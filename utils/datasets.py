@@ -7,7 +7,8 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 
-from utils.augmentations import horisontal_flip
+#from utils.augmentations import horisontal_flip
+from augmentations import horisontal_flip
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 
@@ -118,9 +119,11 @@ class ListDataset(Dataset):
             # Returns (x, y, w, h)
             boxes[:, 1] = ((x1 + x2) / 2) / padded_w
             boxes[:, 2] = ((y1 + y2) / 2) / padded_h
+            # print(boxes)
+            # print(w_factor)
+            # print(padded_w)
             boxes[:, 3] *= w_factor / padded_w
             boxes[:, 4] *= h_factor / padded_h
-
             targets = torch.zeros((len(boxes), 6))
             targets[:, 1:] = boxes
 

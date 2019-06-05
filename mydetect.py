@@ -9,6 +9,7 @@ import sys
 import time
 import datetime
 import argparse
+import errno
 
 from PIL import Image
 
@@ -36,11 +37,15 @@ if __name__ == "__main__":
     opt = parser.parse_args()
     print(opt)
 
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = torch.device("cpu")
 
-    os.makedirs("output", exist_ok=True)
-
+#    os.makedirs("output", exist_ok=True)
+    try:
+        os.makedirs("output")
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
     # Set up model
     model = Darknet(opt.model_def, img_size=opt.img_size).to(device)
 
@@ -62,7 +67,7 @@ if __name__ == "__main__":
 
     classes = load_classes(opt.class_path)  # Extracts class labels from file
 
-    #Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+#    Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
     Tensor = torch.FloatTensor
 
     imgs = []  # Stores image paths
@@ -90,7 +95,8 @@ if __name__ == "__main__":
         img_detections.extend(detections)
 
     # Bounding-box colors
-    cmap = plt.get_cmap("tab20b")
+#    cmap = plt.get_cmap("tab20b")
+    cmap = plt.get_cmap("rainbow")
     colors = [cmap(i) for i in np.linspace(0, 1, 20)]
 
     print("\nSaving images:")
@@ -142,5 +148,5 @@ if __name__ == "__main__":
         plt.gca().xaxis.set_major_locator(NullLocator())
         plt.gca().yaxis.set_major_locator(NullLocator())
         filename = path.split("/")[-1].split(".")[0]
-        plt.savefig(f"output/{filename}.png", bbox_inches="tight", pad_inches=0.0)
+        plt.savefig("output/{}.png".format(filename), bbox_inches="tight", pad_inches=0.0)
         plt.close()
